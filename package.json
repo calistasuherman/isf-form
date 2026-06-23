@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@netlify/plugin-nextjs": "^5.15.12",
     "jspdf": "^2.5.1",
     "next": "14.2.5",
     "react": "^18",
