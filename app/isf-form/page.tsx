@@ -203,14 +203,14 @@ export default function ISFForm() {
     // Title
     doc.setFontSize(16.5);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(80, 80, 80);
+    doc.setTextColor(0, 0, 0);
     doc.text("IMPORTER SECURITY FILING", pageW / 2, y, { align: "center" });
     y += 16;
 
     // Subtitle
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(80, 80, 80);
+    doc.setTextColor(0, 0, 0);
     doc.text("10+2 Form", pageW / 2, y, { align: "center" });
     y += 18;
 
@@ -221,7 +221,7 @@ export default function ISFForm() {
       doc.rect(ML, y, contentW, 22, "F");
       doc.setFontSize(8.8);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(80, 80, 80);
+      doc.setTextColor(0, 0, 0);
       doc.text(title.toUpperCase(), ML + 8, y + 14);
       y += 22;
     };
@@ -241,12 +241,12 @@ export default function ISFForm() {
       const labelLines = doc.splitTextToSize(label.toUpperCase(), COL_LABEL - 14);
       doc.setFontSize(8.25);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(80, 80, 80);
+      doc.setTextColor(0, 0, 0);
       doc.text(labelLines, ML + 7, y + rowH / 2 - (labelLines.length * 5) / 2 + 4);
 
       doc.setFontSize(10.45);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(80, 80, 80);
+      doc.setTextColor(0, 0, 0);
       doc.text(valLines, ML + COL_LABEL + 8, y + 14);
 
       y += rowH;
@@ -270,7 +270,7 @@ export default function ISFForm() {
     y += 20;
     doc.setFontSize(8.8);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(80, 80, 80);
+    doc.setTextColor(0, 0, 0);
     doc.text("© Agiloc International", pageW / 2, y, { align: "center" });
 
     const bol = form.masterBOL || form.houseBOL || "Form";

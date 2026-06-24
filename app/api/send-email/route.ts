@@ -7,7 +7,7 @@ import path from "path";
 export const runtime = "nodejs";
 
 const BLACK = rgb(0.08, 0.08, 0.08);
-const GRAY = rgb(0.314, 0.314, 0.314);        // #505050
+const GRAY = rgb(0, 0, 0);
 const LIGHT_GRAY = rgb(0.961, 0.961, 0.961);
 const WHITE = rgb(1, 1, 1);
 const LIGHT_RED = rgb(0.824, 0.824, 0.824);    // #d2d2d2
