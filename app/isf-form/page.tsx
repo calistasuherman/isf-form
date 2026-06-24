@@ -191,7 +191,7 @@ export default function ISFForm() {
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
     doc.line(ML, y, ML + contentW, y);
-    y += 22;
+    y += 36;
 
     // Title
     doc.setFontSize(16.5);
