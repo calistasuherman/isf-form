@@ -441,7 +441,7 @@ export default function ISFForm() {
           {/* Page title */}
           <div style={{ marginBottom: 28 }}>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#111", letterSpacing: -0.3 }}>IMPORTER SECURITY FILING</h1>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#888" }}>Complete all fields and submit. You can send the filing via email or download a PDF copy.</p>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: submitted ? "#1a7a3a" : "#888" }}>{submitted ? "Successful" : "Complete all fields and submit. You can send the filing via email or download a PDF copy."}</p>
           </div>
 
           {!submitted ? (
