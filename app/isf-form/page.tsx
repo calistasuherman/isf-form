@@ -157,77 +157,87 @@ export default function ISFForm() {
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const colLabel = 180;
-    const colValue = pageWidth - margin - colLabel - margin;
+    const colLabel = 230;
+    const colValue = pageWidth - margin * 2 - colLabel;
     let y = margin;
 
-    // Header
-    doc.setFillColor(164, 40, 40);
-    doc.rect(0, 0, pageWidth, 72, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(15);
-    doc.setFont("helvetica", "bold");
-    doc.text("IMPORTER SECURITY FILING FORM (10+2 FORM)", pageWidth / 2, 28, { align: "center" });
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text("Agiloc International", pageWidth / 2, 46, { align: "center" });
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 62, { align: "center" });
+    // Load logo
+    let logoDataUrl: string | null = null;
+    try {
+      const resp = await fetch("/agiloc-logo.jpg");
+      const blob = await resp.blob();
+      logoDataUrl = await new Promise<string>((res) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+    } catch { /* skip logo if unavailable */ }
 
-    y = 90;
+    // Header background
+    const headerH = logoDataUrl ? 90 : 60;
+    doc.setFillColor(164, 40, 40);
+    doc.rect(0, 0, pageWidth, headerH, "F");
+
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, "JPEG", margin, 10, 70, 70);
+    }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    const textX = logoDataUrl ? margin + 82 : pageWidth / 2;
+    const textAlign = logoDataUrl ? "left" : "center";
+    doc.text("IMPORTER SECURITY FILING FORM (10+2 FORM)", textX, logoDataUrl ? 38 : 28, { align: textAlign, maxWidth: pageWidth - margin - textX });
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(new Date().toLocaleDateString(), textX, logoDataUrl ? 54 : 44, { align: textAlign });
+
+    y = headerH + 16;
+
+    const drawSectionHeader = (title: string) => {
+      if (y + 24 > pageHeight - margin) { doc.addPage(); y = margin; }
+      doc.setFillColor(30, 30, 30);
+      doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text(title.toUpperCase(), margin + 8, y + 14);
+      y += 22;
+    };
 
     const drawRow = (label: string, value: string, shade: boolean) => {
       const valueLines = doc.splitTextToSize(value || "(not provided)", colValue - 16);
       const rowHeight = Math.max(24, valueLines.length * 13 + 14);
+      if (y + rowHeight > pageHeight - margin) { doc.addPage(); y = margin; }
 
-      if (y + rowHeight > pageHeight - margin) {
-        doc.addPage();
-        y = margin;
-      }
-
-      // Row background
-      if (shade) {
-        doc.setFillColor(253, 242, 242);
-        doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-      } else {
-        doc.setFillColor(255, 255, 255);
-        doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-      }
-
-      // Border
-      doc.setDrawColor(220, 210, 210);
+      doc.setFillColor(shade ? 245 : 255, shade ? 245 : 255, shade ? 245 : 255);
+      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
+      doc.setDrawColor(210, 210, 210);
       doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "S");
-
-      // Divider between label and value columns
       doc.line(margin + colLabel, y, margin + colLabel, y + rowHeight);
 
-      // Label
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(164, 40, 40);
-      doc.text(label.toUpperCase(), margin + 8, y + rowHeight / 2 + 3);
+      doc.setTextColor(30, 30, 30);
+      doc.text(label.toUpperCase(), margin + 6, y + rowHeight / 2 + 3, { maxWidth: colLabel - 12 });
 
-      // Value
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(30, 30, 30);
       doc.text(valueLines, margin + colLabel + 8, y + 14);
-
       y += rowHeight;
     };
 
+    drawSectionHeader("Filing Information");
     let shade = false;
-    BASIC_FIELDS.forEach(({ key, label }) => {
-      drawRow(label, form[key], shade);
-      shade = !shade;
-    });
+    BASIC_FIELDS.forEach(({ key, label }) => { drawRow(label, form[key], shade); shade = !shade; });
 
     form.manufacturers.forEach((m, i) => {
-      const mLabel = `Manufacturer${form.manufacturers.length > 1 ? ` ${i + 1}` : ""} (Name & Address)`;
-      drawRow(mLabel, m.name, shade);
-      shade = !shade;
+      drawSectionHeader(`Manufacturer${form.manufacturers.length > 1 ? ` ${i + 1}` : ""}`);
+      shade = false;
+      drawRow("Name & Address", m.name, shade); shade = !shade;
       m.itemDescriptions.forEach((desc, j) => {
-        const dLabel = `Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`;
-        drawRow(dLabel, desc, shade);
+        drawRow(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc, shade);
         shade = !shade;
       });
     });

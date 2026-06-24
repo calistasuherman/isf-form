@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fs from "fs";
+import path from "path";
 
 export const runtime = "nodejs";
 
@@ -12,27 +14,65 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   const pageWidth = 612;
   const pageHeight = 792;
   const margin = 40;
-  const colLabel = 190;
+  const colLabel = 230;
   const colValue = pageWidth - margin * 2 - colLabel;
-  const accent = rgb(0.643, 0.157, 0.157);
-  const lightRed = rgb(0.992, 0.949, 0.949);
   const white = rgb(1, 1, 1);
   const dark = rgb(0.118, 0.118, 0.118);
-  const borderColor = rgb(0.863, 0.824, 0.824);
+  const lightGray = rgb(0.961, 0.961, 0.961);
+  const borderColor = rgb(0.824, 0.824, 0.824);
+  const accent = rgb(0.643, 0.157, 0.157);
+
+  // Try to embed logo
+  let logoImage = null;
+  let logoWidth = 0, logoHeight = 0;
+  try {
+    const logoPath = path.join(process.cwd(), "public", "agiloc-logo.jpg");
+    const logoBytes = fs.readFileSync(logoPath);
+    logoImage = await pdfDoc.embedJpg(logoBytes);
+    const logoDims = logoImage.scale(1);
+    const maxLogoH = 70;
+    const scale = maxLogoH / logoDims.height;
+    logoWidth = logoDims.width * scale;
+    logoHeight = maxLogoH;
+  } catch { /* skip logo if unavailable */ }
+
+  const headerH = logoImage ? 90 : 60;
 
   let page = pdfDoc.addPage([pageWidth, pageHeight]);
   let y = pageHeight;
 
   // Header
-  page.drawRectangle({ x: 0, y: pageHeight - 72, width: pageWidth, height: 72, color: accent });
-  page.drawText("IMPORTER SECURITY FILING FORM (10+2 FORM)", {
-    x: margin, y: pageHeight - 30, font: boldFont, size: 13, color: white,
-    maxWidth: pageWidth - margin * 2,
-  });
-  page.drawText("Agiloc International", { x: margin, y: pageHeight - 48, font: regularFont, size: 9, color: rgb(1, 0.85, 0.85) });
-  page.drawText(`Generated: ${new Date().toLocaleDateString()}`, { x: margin, y: pageHeight - 62, font: regularFont, size: 8, color: rgb(1, 0.85, 0.85) });
+  page.drawRectangle({ x: 0, y: pageHeight - headerH, width: pageWidth, height: headerH, color: accent });
 
-  y = pageHeight - 88;
+  if (logoImage) {
+    page.drawImage(logoImage, { x: margin, y: pageHeight - headerH + 10, width: logoWidth, height: logoHeight });
+  }
+
+  const textX = logoImage ? margin + logoWidth + 12 : pageWidth / 2;
+  page.drawText("IMPORTER SECURITY FILING FORM (10+2 FORM)", {
+    x: textX,
+    y: pageHeight - 32,
+    font: boldFont,
+    size: 13,
+    color: white,
+    maxWidth: pageWidth - textX - margin,
+  });
+  page.drawText(new Date().toLocaleDateString(), {
+    x: textX,
+    y: pageHeight - 50,
+    font: regularFont,
+    size: 8,
+    color: rgb(1, 0.9, 0.9),
+  });
+
+  y = pageHeight - headerH - 16;
+
+  const drawSectionHeader = (title: string) => {
+    if (y - 22 < margin) { page = pdfDoc.addPage([pageWidth, pageHeight]); y = pageHeight - margin; }
+    page.drawRectangle({ x: margin, y: y - 22, width: pageWidth - margin * 2, height: 22, color: dark });
+    page.drawText(title.toUpperCase(), { x: margin + 8, y: y - 15, font: boldFont, size: 8, color: white });
+    y -= 22;
+  };
 
   const drawRow = (label: string, value: string, shade: boolean) => {
     const displayValue = value || "(not provided)";
@@ -40,14 +80,12 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     const lineHeight = fontSize * 1.35;
     const maxValueWidth = colValue - 16;
 
-    // Wrap value text
     const words = displayValue.split(" ");
     const lines: string[] = [];
     let currentLine = "";
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const testWidth = regularFont.widthOfTextAtSize(testLine, fontSize);
-      if (testWidth > maxValueWidth && currentLine) {
+      if (regularFont.widthOfTextAtSize(testLine, fontSize) > maxValueWidth && currentLine) {
         lines.push(currentLine);
         currentLine = word;
       } else {
@@ -57,59 +95,57 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     if (currentLine) lines.push(currentLine);
 
     const rowHeight = Math.max(24, lines.length * lineHeight + 14);
-
-    if (y - rowHeight < margin) {
-      page = pdfDoc.addPage([pageWidth, pageHeight]);
-      y = pageHeight - margin;
-    }
+    if (y - rowHeight < margin) { page = pdfDoc.addPage([pageWidth, pageHeight]); y = pageHeight - margin; }
 
     const rowY = y - rowHeight;
-
-    // Background
-    page.drawRectangle({ x: margin, y: rowY, width: pageWidth - margin * 2, height: rowHeight, color: shade ? lightRed : white });
-
-    // Border
+    page.drawRectangle({ x: margin, y: rowY, width: pageWidth - margin * 2, height: rowHeight, color: shade ? lightGray : white });
     page.drawRectangle({ x: margin, y: rowY, width: pageWidth - margin * 2, height: rowHeight, borderColor, borderWidth: 0.5 });
-
-    // Column divider
     page.drawLine({ start: { x: margin + colLabel, y: rowY }, end: { x: margin + colLabel, y: rowY + rowHeight }, thickness: 0.5, color: borderColor });
 
-    // Label
-    const labelFontSize = 7.5;
-    const labelText = label.toUpperCase();
-    page.drawText(labelText, {
-      x: margin + 6,
-      y: rowY + rowHeight / 2 - labelFontSize / 2,
-      font: boldFont,
-      size: labelFontSize,
-      color: accent,
-      maxWidth: colLabel - 12,
+    page.drawText(label.toUpperCase(), {
+      x: margin + 6, y: rowY + rowHeight / 2 - 4,
+      font: boldFont, size: 7.5, color: dark, maxWidth: colLabel - 12,
     });
 
-    // Value lines
     lines.forEach((line, idx) => {
       page.drawText(line, {
         x: margin + colLabel + 8,
         y: rowY + rowHeight - 14 - idx * lineHeight,
-        font: regularFont,
-        size: fontSize,
-        color: dark,
+        font: regularFont, size: fontSize, color: dark,
       });
     });
 
     y -= rowHeight;
   };
 
+  // Group formData into filing info and manufacturers
+  // The formData comes as flat rows — find manufacturer section headers by label pattern
+  let inManufacturer = false;
+  let mfgIndex = 0;
   let shade = false;
+
+  drawSectionHeader("Filing Information");
+
   for (const { label, value } of formData) {
+    const isManufacturer = /^manufacturer/i.test(label);
+    if (isManufacturer && !inManufacturer) {
+      mfgIndex++;
+      drawSectionHeader(`Manufacturer ${mfgIndex}`);
+      shade = false;
+      inManufacturer = true;
+    } else if (!isManufacturer && /^item description/i.test(label) && !inManufacturer) {
+      // item description without preceding manufacturer header — still in same group
+    } else if (!isManufacturer && !/^item description/i.test(label)) {
+      inManufacturer = false;
+    }
     drawRow(label, value, shade);
     shade = !shade;
   }
 
-  // Footer on last page
-  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: 28, color: rgb(0.97, 0.97, 0.97) });
+  // Footer
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: 24, color: rgb(0.95, 0.95, 0.95) });
   page.drawText("© Agiloc International — Confidential", {
-    x: pageWidth / 2 - 80, y: 9, font: regularFont, size: 8, color: rgb(0.6, 0.6, 0.6),
+    x: pageWidth / 2 - 75, y: 7, font: regularFont, size: 7.5, color: rgb(0.5, 0.5, 0.5),
   });
 
   return pdfDoc.save();
