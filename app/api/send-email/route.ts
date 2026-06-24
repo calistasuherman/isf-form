@@ -112,7 +112,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     checkY(26);
     y -= 6;
     page.drawRectangle({ x: ML, y: y - 20, width: contentW, height: 20, color: BLACK });
-    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 14, font: bold, size: 7.5, color: WHITE, characterSpacing: 0.8 });
+    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 14, font: bold, size: 7.5, color: WHITE });
     y -= 20;
     rowShade = false;
   };
@@ -137,7 +137,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     const labelBlockH = labelLines.length * (LABEL_SIZE * 1.4);
     const labelStartY = rowY + rowH / 2 + labelBlockH / 2 - LABEL_SIZE;
     labelLines.forEach((ln, i) => {
-      page.drawText(ln.toUpperCase(), { x: ML + 7, y: labelStartY - i * (LABEL_SIZE * 1.4), font: bold, size: LABEL_SIZE, color: DARK_GRAY, characterSpacing: 0.3 });
+      page.drawText(ln.toUpperCase(), { x: ML + 7, y: labelStartY - i * (LABEL_SIZE * 1.4), font: bold, size: LABEL_SIZE, color: DARK_GRAY });
     });
 
     // Value
