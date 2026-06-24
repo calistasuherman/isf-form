@@ -176,7 +176,7 @@ export default function ISFForm() {
     // Logo centered
     let logoDataUrl: string | null = null;
     try {
-      const resp = await fetch("/agiloc-logo.jpg");
+      const resp = await fetch("/agiloc-logo.png");
       const blob = await resp.blob();
       logoDataUrl = await new Promise<string>((res) => {
         const reader = new FileReader();
@@ -188,7 +188,7 @@ export default function ISFForm() {
     if (logoDataUrl) {
       const logoH = 52;
       const logoW = logoH * 2.8;
-      doc.addImage(logoDataUrl, "JPEG", (pageWidth - logoW) / 2, y - logoH, logoW, logoH);
+      doc.addImage(logoDataUrl, "PNG", (pageWidth - logoW) / 2, y - logoH, logoW, logoH);
       y -= logoH + 14;
     }
 
@@ -434,7 +434,7 @@ export default function ISFForm() {
         {/* Header */}
         <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#f2f2f2", borderBottom: "1px solid #e0e0e0", padding: "18px 40px", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
+          <img src="/agiloc-logo.png" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
         </div>
 
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "36px 24px 80px" }}>

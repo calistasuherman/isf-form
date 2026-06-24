@@ -50,8 +50,8 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   // ── HEADER ──────────────────────────────────────────────────────────────
   let logoImage = null, logoW = 0, logoH = 0;
   try {
-    const bytes = fs.readFileSync(path.join(process.cwd(), "public", "agiloc-logo.jpg"));
-    logoImage = await pdfDoc.embedJpg(bytes);
+    const bytes = fs.readFileSync(path.join(process.cwd(), "public", "agiloc-logo.png"));
+    logoImage = await pdfDoc.embedPng(bytes);
     const dims = logoImage.scale(1);
     logoH = 52;
     logoW = (dims.width / dims.height) * logoH;
