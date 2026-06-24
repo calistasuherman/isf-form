@@ -141,7 +141,10 @@ export default function ISFForm() {
       let packingListName: string | null = null;
       if (form.packingList) {
         const buf = await form.packingList.arrayBuffer();
-        packingListBase64 = btoa(String.fromCharCode(...Array.from(new Uint8Array(buf))));
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        packingListBase64 = btoa(binary);
         packingListName = form.packingList.name;
       }
       const res = await fetch("/api/send-email", {
