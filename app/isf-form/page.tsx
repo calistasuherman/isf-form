@@ -184,20 +184,20 @@ export default function ISFForm() {
       const logoH = 52;
       const logoW = (props.width / props.height) * logoH;
       doc.addImage(logoDataUrl, "PNG", (pageW - logoW) / 2, y, logoW, logoH);
-      y += logoH + 16;
+      y += logoH + 14;
     }
+
+    // Thin gray rule above title
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, ML + contentW, y);
+    y += 14;
 
     // Title
     doc.setFontSize(15);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(20, 20, 20);
+    doc.setTextColor(0, 0, 0);
     doc.text("IMPORTER SECURITY FILING", pageW / 2, y, { align: "center" });
-    y += 16;
-
-    // Thin gray rule
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.line(ML, y, ML + contentW, y);
     y += 18;
 
     const drawSectionHeader = (title: string) => {
@@ -207,7 +207,7 @@ export default function ISFForm() {
       doc.rect(ML, y, contentW, 22, "F");
       doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(100, 20, 20);
+      doc.setTextColor(0, 0, 0);
       doc.text(title.toUpperCase(), ML + 8, y + 14);
       y += 22;
     };
@@ -227,12 +227,12 @@ export default function ISFForm() {
       const labelLines = doc.splitTextToSize(label.toUpperCase(), COL_LABEL - 14);
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(90, 90, 90);
+      doc.setTextColor(0, 0, 0);
       doc.text(labelLines, ML + 7, y + rowH / 2 - (labelLines.length * 5) / 2 + 4);
 
       doc.setFontSize(9.5);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(20, 20, 20);
+      doc.setTextColor(0, 0, 0);
       doc.text(valLines, ML + COL_LABEL + 8, y + 14);
 
       y += rowH;
@@ -251,6 +251,13 @@ export default function ISFForm() {
         drawRow(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc);
       });
     });
+
+    // Footer
+    y += 10;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("© Agiloc International", pageW / 2, y, { align: "center" });
 
     const bol = form.masterBOL || form.houseBOL || "Form";
     doc.save(`ISF_${bol}.pdf`);

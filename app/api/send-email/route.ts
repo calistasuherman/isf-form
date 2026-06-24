@@ -47,26 +47,25 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   } catch { /* skip */ }
 
   if (logoImage) {
-    // In pdf-lib, y is bottom of the image
     page.drawImage(logoImage, { x: (W - logoW) / 2, y: y - logoH, width: logoW, height: logoH });
-    y -= logoH + 16;
+    y -= logoH + 14;
   }
+
+  // Thin gray rule above title
+  page.drawLine({ start: { x: ML, y }, end: { x: ML + contentW, y }, thickness: 0.5, color: BORDER });
+  y -= 14;
 
   // Title
   const title = "IMPORTER SECURITY FILING";
   const titleW = bold.widthOfTextAtSize(title, 15);
   page.drawText(title, { x: (W - titleW) / 2, y, font: bold, size: 15, color: BLACK });
-  y -= 16;
-
-  // Thin gray rule
-  page.drawLine({ start: { x: ML, y }, end: { x: ML + contentW, y }, thickness: 0.5, color: BORDER });
   y -= 18;
 
   const drawSectionHeader = (title: string) => {
     checkY(28);
     y -= 4;
     page.drawRectangle({ x: ML, y: y - 22, width: contentW, height: 22, color: LIGHT_RED });
-    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 15, font: bold, size: 8, color: DARK_RED });
+    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 15, font: bold, size: 8, color: BLACK });
     y -= 22;
   };
 
@@ -103,7 +102,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     const labelBlockH = labelLines.length * (labelFontSize * 1.4);
     const labelStartY = rowY + rowH / 2 + labelBlockH / 2 - labelFontSize;
     labelLines.forEach((ln, i) => {
-      page.drawText(ln, { x: ML + 7, y: labelStartY - i * (labelFontSize * 1.4), font: bold, size: labelFontSize, color: DARK_GRAY });
+      page.drawText(ln, { x: ML + 7, y: labelStartY - i * (labelFontSize * 1.4), font: bold, size: labelFontSize, color: BLACK });
     });
 
     // Value
@@ -138,6 +137,12 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
       }
     }
   }
+
+  // Footer below table
+  y -= 14;
+  const footer = "© Agiloc International";
+  const footerW = regular.widthOfTextAtSize(footer, 8);
+  page.drawText(footer, { x: (W - footerW) / 2, y, font: regular, size: 8, color: BLACK });
 
   return pdfDoc.save();
 }
