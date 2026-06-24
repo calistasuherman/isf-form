@@ -434,7 +434,7 @@ export default function ISFForm() {
         {/* Header */}
         <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#f2f2f2", borderBottom: "1px solid #e0e0e0", height: 80, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/agiloc-logo.png" alt="Agiloc International" style={{ height: "100%", maxHeight: 64, objectFit: "contain" }} />
+          <img src="/agiloc-logo.png" alt="Agiloc International" style={{ height: "100%", objectFit: "contain" }} />
         </div>
 
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "36px 24px 80px" }}>
