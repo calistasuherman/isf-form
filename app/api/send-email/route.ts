@@ -7,11 +7,10 @@ import path from "path";
 export const runtime = "nodejs";
 
 const BLACK = rgb(0.08, 0.08, 0.08);
-const DARK_GRAY = rgb(0.35, 0.35, 0.35);
+const GRAY = rgb(0.314, 0.314, 0.314);        // #505050
 const LIGHT_GRAY = rgb(0.961, 0.961, 0.961);
 const WHITE = rgb(1, 1, 1);
 const LIGHT_RED = rgb(1, 0.804, 0.824);       // #ffcdd2
-const DARK_RED = rgb(0.392, 0.078, 0.078);    // section header text
 const BORDER = rgb(0.824, 0.824, 0.824);
 
 async function buildPDF(formData: { label: string; value: string }[]): Promise<Uint8Array> {
@@ -53,19 +52,19 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
 
   // Thin gray rule above title
   page.drawLine({ start: { x: ML, y }, end: { x: ML + contentW, y }, thickness: 0.5, color: BORDER });
-  y -= 14;
+  y -= 20;
 
   // Title
   const title = "IMPORTER SECURITY FILING";
-  const titleW = bold.widthOfTextAtSize(title, 15);
-  page.drawText(title, { x: (W - titleW) / 2, y, font: bold, size: 15, color: BLACK });
+  const titleW = bold.widthOfTextAtSize(title, 16.5);
+  page.drawText(title, { x: (W - titleW) / 2, y, font: bold, size: 16.5, color: GRAY });
   y -= 18;
 
   const drawSectionHeader = (title: string) => {
     checkY(28);
     y -= 4;
     page.drawRectangle({ x: ML, y: y - 22, width: contentW, height: 22, color: LIGHT_RED });
-    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 15, font: bold, size: 8, color: BLACK });
+    page.drawText(title.toUpperCase(), { x: ML + 8, y: y - 15, font: bold, size: 8.8, color: GRAY });
     y -= 22;
   };
 
@@ -102,12 +101,12 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
     const labelBlockH = labelLines.length * (labelFontSize * 1.4);
     const labelStartY = rowY + rowH / 2 + labelBlockH / 2 - labelFontSize;
     labelLines.forEach((ln, i) => {
-      page.drawText(ln, { x: ML + 7, y: labelStartY - i * (labelFontSize * 1.4), font: bold, size: labelFontSize, color: BLACK });
+      page.drawText(ln, { x: ML + 7, y: labelStartY - i * (labelFontSize * 1.4), font: bold, size: 8.25, color: GRAY });
     });
 
     // Value
     valLines.forEach((ln, i) => {
-      page.drawText(ln, { x: ML + COL_LABEL + 8, y: rowY + rowH - 14 - i * lineH, font: regular, size: fontSize, color: BLACK });
+      page.drawText(ln, { x: ML + COL_LABEL + 8, y: rowY + rowH - 14 - i * lineH, font: regular, size: 10.45, color: GRAY });
     });
 
     y -= rowH;
@@ -139,10 +138,10 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   }
 
   // Footer below table
-  y -= 14;
+  y -= 20;
   const footer = "© Agiloc International";
-  const footerW = regular.widthOfTextAtSize(footer, 8);
-  page.drawText(footer, { x: (W - footerW) / 2, y, font: regular, size: 8, color: BLACK });
+  const footerW = regular.widthOfTextAtSize(footer, 8.8);
+  page.drawText(footer, { x: (W - footerW) / 2, y, font: regular, size: 8.8, color: GRAY });
 
   return pdfDoc.save();
 }
