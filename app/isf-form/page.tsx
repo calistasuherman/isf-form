@@ -379,16 +379,15 @@ export default function ISFForm() {
 
       <div style={{ minHeight: "100vh", background: "#f6f5f3" }}>
         {/* Header */}
-        <div style={{ background: "#fff", borderBottom: "1px solid #e8e8e8", padding: "0 40px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
+        <div style={{ background: "#fff", borderBottom: "1px solid #e8e8e8", padding: "18px 40px", textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 40, objectFit: "contain" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: "#999" }}>ISF 10+2 Filing</span>
+          <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
         </div>
 
         <div style={{ maxWidth: 780, margin: "0 auto", padding: "36px 24px 80px" }}>
           {/* Page title */}
           <div style={{ marginBottom: 28 }}>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#111", letterSpacing: -0.3 }}>Importer Security Filing</h1>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#111", letterSpacing: -0.3 }}>IMPORTER SECURITY FILING</h1>
             <p style={{ margin: "4px 0 0", fontSize: 13, color: "#888" }}>Complete all fields and submit. You can send the filing via email or download a PDF copy.</p>
           </div>
 
@@ -423,7 +422,7 @@ export default function ISFForm() {
                 </div>
               </div>
 
-              {/* Parties */}
+              {/* Parties & Logistics */}
               <div className="section-card">
                 <div className="section-title">Parties</div>
                 <div className="section-body">
@@ -436,13 +435,6 @@ export default function ISFForm() {
                       </div>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* Logistics */}
-              <div className="section-card">
-                <div className="section-title">Logistics</div>
-                <div className="section-body">
                   <div className="field-wrap">
                     <label className="field-label">Container Stuffing Location (Name & Address)</label>
                     <textarea className="field-input" rows={3} required value={form.stuffingLocation} onChange={(e) => handleChange("stuffingLocation", e.target.value)} placeholder="Location name and full address..." />
@@ -457,7 +449,7 @@ export default function ISFForm() {
               {/* Manufacturers */}
               <div className="section-card">
                 <div className="section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span>Manufacturers & Items</span>
+                  <span>Manufacturers</span>
                   <button type="button" className="btn-primary" style={{ padding: "5px 14px", fontSize: 12 }} onClick={addManufacturer}>+ Add Manufacturer</button>
                 </div>
                 <div className="section-body">
@@ -475,7 +467,7 @@ export default function ISFForm() {
                           <textarea className="field-input" rows={3} required value={mfg.name} onChange={(e) => handleManufacturerName(i, e.target.value)} placeholder="Manufacturer name and full address..." />
                         </div>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, color: "#777" }}>Item Descriptions</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, color: "#777" }}>Item Description</span>
                           <button type="button" className="btn-outline" style={{ padding: "4px 12px", fontSize: 11 }} onClick={() => addItemDescription(i)}>+ Add Item</button>
                         </div>
                         {mfg.itemDescriptions.map((desc, j) => (
@@ -512,8 +504,7 @@ export default function ISFForm() {
               </div>
 
               {/* Submit */}
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 16, marginTop: 8 }}>
-                <span style={{ fontSize: 12, color: "#aaa" }}>© Agiloc International</span>
+              <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 8 }}>
                 <button type="submit" className="btn-primary" style={{ padding: "12px 36px", fontSize: 14 }}>
                   Submit Filing →
                 </button>
@@ -591,6 +582,11 @@ export default function ISFForm() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign: "center", padding: "20px", borderTop: "1px solid #e8e8e8", background: "#fff" }}>
+          <span style={{ fontSize: 12, color: "#aaa" }}>© Agiloc International</span>
         </div>
       </div>
     </>
