@@ -154,50 +154,81 @@ export default function ISFForm() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "letter" });
 
-    const margin = 50;
+    const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const colLabel = 180;
+    const colValue = pageWidth - margin - colLabel - margin;
     let y = margin;
 
+    // Header
     doc.setFillColor(164, 40, 40);
-    doc.rect(0, 0, pageWidth, 70, "F");
+    doc.rect(0, 0, pageWidth, 72, "F");
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
+    doc.setFontSize(15);
     doc.setFont("helvetica", "bold");
-    doc.text("Importer Security Filing Form (10+2 Form)", pageWidth / 2, 30, { align: "center" });
-    doc.setFontSize(10);
+    doc.text("IMPORTER SECURITY FILING FORM (10+2 FORM)", pageWidth / 2, 28, { align: "center" });
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 52, { align: "center" });
+    doc.text("Agiloc International", pageWidth / 2, 46, { align: "center" });
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 62, { align: "center" });
 
-    y = 100;
-    doc.setTextColor(30, 30, 30);
+    y = 90;
 
-    const writeField = (label: string, value: string) => {
-      const lines = doc.splitTextToSize(value || "(not provided)", pageWidth - margin * 2 - 10);
-      const blockHeight = 18 + lines.length * 14 + 10;
-      if (y + blockHeight > doc.internal.pageSize.getHeight() - margin) {
+    const drawRow = (label: string, value: string, shade: boolean) => {
+      const valueLines = doc.splitTextToSize(value || "(not provided)", colValue - 16);
+      const rowHeight = Math.max(24, valueLines.length * 13 + 14);
+
+      if (y + rowHeight > pageHeight - margin) {
         doc.addPage();
         y = margin;
       }
-      doc.setFontSize(9);
+
+      // Row background
+      if (shade) {
+        doc.setFillColor(253, 242, 242);
+        doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
+      }
+
+      // Border
+      doc.setDrawColor(220, 210, 210);
+      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "S");
+
+      // Divider between label and value columns
+      doc.line(margin + colLabel, y, margin + colLabel, y + rowHeight);
+
+      // Label
+      doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(164, 40, 40);
-      doc.text(label.toUpperCase(), margin, y);
-      y += 4;
-      doc.setDrawColor(220, 220, 220);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 14;
+      doc.text(label.toUpperCase(), margin + 8, y + rowHeight / 2 + 3);
+
+      // Value
+      doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
       doc.setTextColor(30, 30, 30);
-      doc.text(lines, margin, y);
-      y += lines.length * 14 + 18;
+      doc.text(valueLines, margin + colLabel + 8, y + 14);
+
+      y += rowHeight;
     };
 
-    BASIC_FIELDS.forEach(({ key, label }) => writeField(label, form[key]));
+    let shade = false;
+    BASIC_FIELDS.forEach(({ key, label }) => {
+      drawRow(label, form[key], shade);
+      shade = !shade;
+    });
+
     form.manufacturers.forEach((m, i) => {
-      writeField(`Manufacturer ${form.manufacturers.length > 1 ? i + 1 : ""} (Name & Address)`.trim(), m.name);
+      const mLabel = `Manufacturer${form.manufacturers.length > 1 ? ` ${i + 1}` : ""} (Name & Address)`;
+      drawRow(mLabel, m.name, shade);
+      shade = !shade;
       m.itemDescriptions.forEach((desc, j) => {
-        writeField(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc);
+        const dLabel = `Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`;
+        drawRow(dLabel, desc, shade);
+        shade = !shade;
       });
     });
 
