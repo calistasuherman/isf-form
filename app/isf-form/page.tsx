@@ -155,25 +155,19 @@ export default function ISFForm() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "letter" });
 
-    const ML = 56, MB = 48;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const contentW = pageWidth - ML * 2;
+    const ML = 56;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const contentW = pageW - ML * 2;
     const COL_LABEL = 190;
     const COL_VALUE = contentW - COL_LABEL;
-    let y = pageHeight - 56;
+    let y = 48; // top-down: y=0 is top of page
 
     const checkY = (needed: number) => {
-      if (y - needed < MB + 20) { doc.addPage(); y = pageHeight - 56; }
+      if (y + needed > pageH - 40) { doc.addPage(); y = 48; }
     };
 
-    const rule = (rY: number, thickness = 0.5, r = 210, g = 210, b = 210) => {
-      doc.setDrawColor(r, g, b);
-      doc.setLineWidth(thickness);
-      doc.line(ML, rY, ML + contentW, rY);
-    };
-
-    // Logo centered
+    // Logo centered at top, correct aspect ratio
     let logoDataUrl: string | null = null;
     try {
       const resp = await fetch("/agiloc-logo.png");
@@ -186,51 +180,36 @@ export default function ISFForm() {
     } catch { /* skip */ }
 
     if (logoDataUrl) {
+      const props = doc.getImageProperties(logoDataUrl);
       const logoH = 52;
-      const logoW = logoH * 2.8;
-      doc.addImage(logoDataUrl, "PNG", (pageWidth - logoW) / 2, y - logoH, logoW, logoH);
-      y -= logoH + 14;
+      const logoW = (props.width / props.height) * logoH;
+      doc.addImage(logoDataUrl, "PNG", (pageW - logoW) / 2, y, logoW, logoH);
+      y += logoH + 16;
     }
-
-    // Red rule
-    doc.setDrawColor(139, 25, 25);
-    doc.setLineWidth(0.75);
-    doc.line(ML, y, ML + contentW, y);
-    y -= 14;
 
     // Title
     doc.setFontSize(15);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(20, 20, 20);
-    doc.text("IMPORTER SECURITY FILING", pageWidth / 2, y, { align: "center" });
-    y -= 13;
+    doc.text("IMPORTER SECURITY FILING", pageW / 2, y, { align: "center" });
+    y += 16;
 
-    doc.setFontSize(8.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(140, 140, 140);
-    doc.text("Form 10+2  •  U.S. Customs & Border Protection", pageWidth / 2, y, { align: "center" });
-    y -= 8;
-
-    rule(y);
-    y -= 6;
-
-    // Date right-aligned
-    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text(dateStr, ML + contentW, y, { align: "right" });
-    y -= 22;
+    // Thin gray rule
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, ML + contentW, y);
+    y += 18;
 
     const drawSectionHeader = (title: string) => {
-      checkY(26);
-      y -= 6;
-      doc.setFillColor(20, 20, 20);
-      doc.rect(ML, y - 20, contentW, 20, "F");
-      doc.setFontSize(7.5);
+      checkY(28);
+      y += 4;
+      doc.setFillColor(255, 205, 210);
+      doc.rect(ML, y, contentW, 22, "F");
+      doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(255, 255, 255);
-      doc.text(title.toUpperCase(), ML + 8, y - 7);
-      y -= 20;
+      doc.setTextColor(100, 20, 20);
+      doc.text(title.toUpperCase(), ML + 8, y + 14);
+      y += 22;
     };
 
     let shade = false;
@@ -239,25 +218,24 @@ export default function ISFForm() {
       const rowH = Math.max(26, valLines.length * 13.8 + 18);
       checkY(rowH);
 
-      if (shade) { doc.setFillColor(240, 240, 240); doc.rect(ML, y - rowH, contentW, rowH, "F"); }
-      rule(y - rowH);
+      if (shade) { doc.setFillColor(245, 245, 245); doc.rect(ML, y, contentW, rowH, "F"); }
       doc.setDrawColor(210, 210, 210);
       doc.setLineWidth(0.5);
-      doc.line(ML + COL_LABEL, y - rowH, ML + COL_LABEL, y);
+      doc.rect(ML, y, contentW, rowH, "S");
+      doc.line(ML + COL_LABEL, y, ML + COL_LABEL, y + rowH);
 
       const labelLines = doc.splitTextToSize(label.toUpperCase(), COL_LABEL - 14);
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(90, 90, 90);
-      const labelY = y - rowH / 2 + (labelLines.length * 7.5) / 2;
-      doc.text(labelLines, ML + 7, labelY);
+      doc.text(labelLines, ML + 7, y + rowH / 2 - (labelLines.length * 5) / 2 + 4);
 
       doc.setFontSize(9.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(20, 20, 20);
-      doc.text(valLines, ML + COL_LABEL + 8, y - rowH + 14);
+      doc.text(valLines, ML + COL_LABEL + 8, y + 14);
 
-      y -= rowH;
+      y += rowH;
       shade = !shade;
     };
 
@@ -273,17 +251,6 @@ export default function ISFForm() {
         drawRow(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc);
       });
     });
-
-    y -= 4;
-    doc.setDrawColor(139, 25, 25);
-    doc.setLineWidth(0.75);
-    doc.line(ML, y, ML + contentW, y);
-
-    // Footer
-    doc.setFontSize(7.5);
-    doc.setFont("helvetica", "oblique");
-    doc.setTextColor(150, 150, 150);
-    doc.text("Agiloc International  •  Confidential", pageWidth / 2, MB - 8, { align: "center" });
 
     const bol = form.masterBOL || form.houseBOL || "Form";
     doc.save(`ISF_${bol}.pdf`);
