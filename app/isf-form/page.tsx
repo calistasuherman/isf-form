@@ -210,7 +210,7 @@ export default function ISFForm() {
     const drawSectionHeader = (title: string) => {
       checkY(28);
       y += 4;
-      doc.setFillColor(255, 205, 210);
+      doc.setFillColor(210, 210, 210);
       doc.rect(ML, y, contentW, 22, "F");
       doc.setFontSize(8.8);
       doc.setFont("helvetica", "bold");
