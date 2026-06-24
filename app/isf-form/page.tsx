@@ -260,56 +260,62 @@ export default function ISFForm() {
     <>
       <style>{`
         * { box-sizing: border-box; }
-        body { font-family: 'Times New Roman', Times, serif !important; }
-        input, textarea, button { font-family: 'Times New Roman', Times, serif; }
+        input, textarea, button { font-family: inherit; }
         .field-input {
           width: 100%;
           padding: 10px 13px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
+          border: 1px solid #d8d8d8;
+          border-radius: 7px;
           font-size: 13.5px;
           color: #1a1a1a;
-          background: #fff;
+          background: #fafafa;
           outline: none;
-          transition: border-color 0.15s, box-shadow 0.15s;
+          transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+          box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
         .field-input:focus {
           border-color: ${ACCENT};
-          box-shadow: 0 0 0 3px rgba(139,26,26,0.08);
+          background: #fff;
+          box-shadow: 0 0 0 3px rgba(139,26,26,0.09), inset 0 1px 3px rgba(0,0,0,0.03);
         }
         textarea.field-input { resize: vertical; }
         .btn-primary {
           padding: 10px 24px;
-          background: ${ACCENT};
+          background: linear-gradient(135deg, ${ACCENT} 0%, #6e1414 100%);
           color: #fff;
           border: none;
-          border-radius: 6px;
+          border-radius: 7px;
           font-size: 13.5px;
           font-weight: 600;
           cursor: pointer;
           letter-spacing: 0.2px;
-          transition: background 0.15s, box-shadow 0.15s;
+          transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+          box-shadow: 0 2px 8px rgba(139,26,26,0.3), 0 1px 2px rgba(0,0,0,0.1);
         }
-        .btn-primary:hover { background: #6e1414; box-shadow: 0 4px 12px rgba(139,26,26,0.25); }
-        .btn-primary:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        .btn-primary:hover { opacity: 0.92; box-shadow: 0 4px 16px rgba(139,26,26,0.35), 0 1px 4px rgba(0,0,0,0.12); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(139,26,26,0.3); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
         .btn-outline {
           padding: 10px 24px;
           background: #fff;
           color: ${ACCENT};
           border: 1.5px solid ${ACCENT};
-          border-radius: 6px;
+          border-radius: 7px;
           font-size: 13.5px;
           font-weight: 600;
           cursor: pointer;
-          transition: background 0.15s;
+          transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
-        .btn-outline:hover { background: ${ACCENT_LIGHT}; }
+        .btn-outline:hover { background: ${ACCENT_LIGHT}; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
+        .btn-outline:active { transform: translateY(0); }
         .section-card {
           background: #fff;
-          border: 1px solid #e8e8e8;
-          border-radius: 10px;
+          border: 1px solid #e4e4e4;
+          border-radius: 12px;
           margin-bottom: 20px;
           overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
         }
         .section-title {
           padding: 14px 24px;
@@ -318,7 +324,8 @@ export default function ISFForm() {
           font-weight: 700;
           letter-spacing: 1px;
           text-transform: uppercase;
-          color: #888;
+          color: #999;
+          background: linear-gradient(to bottom, #fafafa, #f6f6f6);
         }
         .section-body { padding: 22px 24px; }
         .field-label {
@@ -332,18 +339,19 @@ export default function ISFForm() {
         .field-wrap { margin-bottom: 18px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
         .mfg-card {
-          border: 1px solid #e8e8e8;
-          border-radius: 8px;
+          border: 1px solid #e4e4e4;
+          border-radius: 9px;
           margin-bottom: 12px;
           overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
         .mfg-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 10px 16px;
-          background: #f7f7f7;
-          border-bottom: 1px solid #eee;
+          background: linear-gradient(to bottom, #f5f5f5, #f0f0f0);
+          border-bottom: 1px solid #e8e8e8;
         }
         .mfg-header-title {
           font-size: 11px;
@@ -365,22 +373,23 @@ export default function ISFForm() {
         }
         .remove-btn:hover { color: #888; }
         .upload-zone {
-          border: 1.5px dashed #ddd;
-          border-radius: 7px;
+          border: 1.5px dashed #d0d0d0;
+          border-radius: 8px;
           padding: 16px 18px;
           cursor: pointer;
           display: flex;
           align-items: center;
           gap: 12px;
-          transition: border-color 0.15s, background 0.15s;
+          transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+          background: #fafafa;
         }
-        .upload-zone:hover { border-color: ${ACCENT}; background: ${ACCENT_LIGHT}; }
+        .upload-zone:hover { border-color: ${ACCENT}; background: ${ACCENT_LIGHT}; box-shadow: 0 2px 8px rgba(139,26,26,0.08); }
         .upload-zone.has-file { border-color: ${ACCENT}; background: ${ACCENT_LIGHT}; }
       `}</style>
 
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
+      <div style={{ minHeight: "100vh", background: "#f4f3f1" }}>
         {/* Header */}
-        <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#fff", borderBottom: "1px solid #e8e8e8", padding: "18px 40px", textAlign: "center" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#fff", borderBottom: "1px solid #e4e4e4", padding: "18px 40px", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
         </div>
