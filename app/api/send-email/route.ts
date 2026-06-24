@@ -155,7 +155,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
 export async function POST(req: NextRequest) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { to, message, formData } = await req.json();
+    const { to, message, formData, packingListBase64, packingListName } = await req.json();
 
     const pdfBytes = await buildPDF(formData as { label: string; value: string }[]);
 
@@ -172,7 +172,12 @@ export async function POST(req: NextRequest) {
             <p>Please find the attached Importer Security Filing (10+2 Form) from Agiloc International.</p>
             <p style="margin:0;font-size:12px;color:#888;border-top:1px solid #eee;padding-top:16px;">Agiloc International — ISF Filing System</p>
            </div>`,
-      attachments: [{ filename: "ISF_Form_10plus2.pdf", content: Buffer.from(pdfBytes) }],
+      attachments: [
+        { filename: "ISF_Form_10plus2.pdf", content: Buffer.from(pdfBytes) },
+        ...(packingListBase64 && packingListName
+          ? [{ filename: packingListName, content: Buffer.from(packingListBase64, "base64") }]
+          : []),
+      ],
     });
 
     if (error) return NextResponse.json({ error }, { status: 400 });

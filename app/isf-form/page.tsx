@@ -137,10 +137,17 @@ export default function ISFForm() {
     setEmailSending(true);
     setEmailError("");
     try {
+      let packingListBase64: string | null = null;
+      let packingListName: string | null = null;
+      if (form.packingList) {
+        const buf = await form.packingList.arrayBuffer();
+        packingListBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+        packingListName = form.packingList.name;
+      }
       const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to: emailTo, message: emailMessage, formData: buildFormDataRows() }),
+        body: JSON.stringify({ to: emailTo, message: emailMessage, formData: buildFormDataRows(), packingListBase64, packingListName }),
       });
       if (!res.ok) throw new Error("Failed to send");
       setEmailSent(true);
