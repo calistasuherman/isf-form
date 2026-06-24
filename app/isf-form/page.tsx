@@ -244,7 +244,7 @@ export default function ISFForm() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
       {/* Logo bar */}
       <div style={{ background: "#fff", padding: "16px 0", textAlign: "center", borderBottom: `3px solid ${ACCENT}` }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
