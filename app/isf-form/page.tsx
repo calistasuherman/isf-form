@@ -149,10 +149,14 @@ export default function ISFForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to: emailTo, message: emailMessage, formData: buildFormDataRows(), packingListBase64, packingListName }),
       });
-      if (!res.ok) throw new Error("Failed to send");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to send");
+      }
       setEmailSent(true);
-    } catch {
-      setEmailError("Failed to send email. Please try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send email. Please try again.";
+      setEmailError(msg);
     } finally {
       setEmailSending(false);
     }
