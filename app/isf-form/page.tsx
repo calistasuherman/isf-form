@@ -430,9 +430,9 @@ export default function ISFForm() {
         .upload-zone.has-file { border-color: ${ACCENT}; background: ${ACCENT_LIGHT}; }
       `}</style>
 
-      <div style={{ minHeight: "100vh", background: "#f4f3f1" }}>
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
         {/* Header */}
-        <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#fff", borderBottom: "1px solid #e4e4e4", padding: "18px 40px", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#f9eee9", borderBottom: "1px solid #f0ddd5", padding: "18px 40px", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
         </div>
