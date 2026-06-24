@@ -155,7 +155,7 @@ export default function ISFForm() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "letter" });
 
-    const ML = 56;
+    const ML = 36;
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const contentW = pageW - ML * 2;
@@ -191,13 +191,20 @@ export default function ISFForm() {
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
     doc.line(ML, y, ML + contentW, y);
-    y += 20;
+    y += 22;
 
     // Title
     doc.setFontSize(16.5);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(80, 80, 80);
-    doc.text("IMPORTER SECURITY FILING", pageW / 2, y, { align: "center" });
+    doc.text("Importer Security Filing", pageW / 2, y, { align: "center" });
+    y += 16;
+
+    // Subtitle
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text("10+2 Form", pageW / 2, y, { align: "center" });
     y += 18;
 
     const drawSectionHeader = (title: string) => {

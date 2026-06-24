@@ -19,7 +19,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   const W = 612, H = 792;
-  const ML = 56;
+  const ML = 36;
   const contentW = W - ML * 2;
   const COL_LABEL = 190;
   const COL_VALUE = contentW - COL_LABEL;
@@ -52,12 +52,18 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
 
   // Thin gray rule above title
   page.drawLine({ start: { x: ML, y }, end: { x: ML + contentW, y }, thickness: 0.5, color: BORDER });
-  y -= 20;
+  y -= 22;
 
   // Title
-  const title = "IMPORTER SECURITY FILING";
+  const title = "Importer Security Filing";
   const titleW = bold.widthOfTextAtSize(title, 16.5);
   page.drawText(title, { x: (W - titleW) / 2, y, font: bold, size: 16.5, color: GRAY });
+  y -= 16;
+
+  // Subtitle
+  const sub = "10+2 Form";
+  const subW = regular.widthOfTextAtSize(sub, 10);
+  page.drawText(sub, { x: (W - subW) / 2, y, font: regular, size: 10, color: GRAY });
   y -= 18;
 
   const drawSectionHeader = (title: string) => {
