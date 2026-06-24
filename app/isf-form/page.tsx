@@ -155,13 +155,25 @@ export default function ISFForm() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "letter" });
 
-    const margin = 40;
+    const ML = 56, MB = 48;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const colLabel = 230;
-    const colValue = pageWidth - margin * 2 - colLabel;
-    let y = margin;
+    const contentW = pageWidth - ML * 2;
+    const COL_LABEL = 190;
+    const COL_VALUE = contentW - COL_LABEL;
+    let y = pageHeight - 56;
 
+    const checkY = (needed: number) => {
+      if (y - needed < MB + 20) { doc.addPage(); y = pageHeight - 56; }
+    };
+
+    const rule = (rY: number, thickness = 0.5, r = 210, g = 210, b = 210) => {
+      doc.setDrawColor(r, g, b);
+      doc.setLineWidth(thickness);
+      doc.line(ML, rY, ML + contentW, rY);
+    };
+
+    // Logo centered
     let logoDataUrl: string | null = null;
     try {
       const resp = await fetch("/agiloc-logo.jpg");
@@ -173,74 +185,105 @@ export default function ISFForm() {
       });
     } catch { /* skip */ }
 
-    const headerH = logoDataUrl ? 90 : 60;
-    doc.setFillColor(139, 26, 26);
-    doc.rect(0, 0, pageWidth, headerH, "F");
-
     if (logoDataUrl) {
-      doc.addImage(logoDataUrl, "JPEG", margin, 10, 70, 70);
+      const logoH = 52;
+      const logoW = logoH * 2.8;
+      doc.addImage(logoDataUrl, "JPEG", (pageWidth - logoW) / 2, y - logoH, logoW, logoH);
+      y -= logoH + 14;
     }
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
-    doc.setFont("helvetica", "bold");
-    const textX = logoDataUrl ? margin + 82 : pageWidth / 2;
-    const textAlign = logoDataUrl ? "left" : "center";
-    doc.text("IMPORTER SECURITY FILING FORM (10+2 FORM)", textX, logoDataUrl ? 38 : 28, { align: textAlign, maxWidth: pageWidth - margin - textX });
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(255, 200, 200);
-    doc.text(new Date().toLocaleDateString(), textX, logoDataUrl ? 54 : 44, { align: textAlign });
+    // Red rule
+    doc.setDrawColor(139, 25, 25);
+    doc.setLineWidth(0.75);
+    doc.line(ML, y, ML + contentW, y);
+    y -= 14;
 
-    y = headerH + 16;
+    // Title
+    doc.setFontSize(15);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(20, 20, 20);
+    doc.text("IMPORTER SECURITY FILING", pageWidth / 2, y, { align: "center" });
+    y -= 13;
+
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(140, 140, 140);
+    doc.text("Form 10+2  •  U.S. Customs & Border Protection", pageWidth / 2, y, { align: "center" });
+    y -= 8;
+
+    rule(y);
+    y -= 6;
+
+    // Date right-aligned
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(dateStr, ML + contentW, y, { align: "right" });
+    y -= 22;
 
     const drawSectionHeader = (title: string) => {
-      if (y + 24 > pageHeight - margin) { doc.addPage(); y = margin; }
-      doc.setFillColor(30, 30, 30);
-      doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(255, 255, 255);
-      doc.text(title.toUpperCase(), margin + 8, y + 14);
-      y += 22;
-    };
-
-    const drawRow = (label: string, value: string, shade: boolean) => {
-      const valueLines = doc.splitTextToSize(value || "(not provided)", colValue - 16);
-      const rowHeight = Math.max(24, valueLines.length * 13 + 14);
-      if (y + rowHeight > pageHeight - margin) { doc.addPage(); y = margin; }
-
-      doc.setFillColor(shade ? 245 : 255, shade ? 245 : 255, shade ? 245 : 255);
-      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-      doc.setDrawColor(210, 210, 210);
-      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "S");
-      doc.line(margin + colLabel, y, margin + colLabel, y + rowHeight);
-
+      checkY(26);
+      y -= 6;
+      doc.setFillColor(20, 20, 20);
+      doc.rect(ML, y - 20, contentW, 20, "F");
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(30, 30, 30);
-      doc.text(label.toUpperCase(), margin + 6, y + rowHeight / 2 + 3, { maxWidth: colLabel - 12 });
+      doc.setTextColor(255, 255, 255);
+      doc.text(title.toUpperCase(), ML + 8, y - 7);
+      y -= 20;
+    };
+
+    let shade = false;
+    const drawRow = (label: string, value: string) => {
+      const valLines = doc.splitTextToSize(value.trim() || "—", COL_VALUE - 14);
+      const rowH = Math.max(26, valLines.length * 13.8 + 18);
+      checkY(rowH);
+
+      if (shade) { doc.setFillColor(240, 240, 240); doc.rect(ML, y - rowH, contentW, rowH, "F"); }
+      rule(y - rowH);
+      doc.setDrawColor(210, 210, 210);
+      doc.setLineWidth(0.5);
+      doc.line(ML + COL_LABEL, y - rowH, ML + COL_LABEL, y);
+
+      const labelLines = doc.splitTextToSize(label.toUpperCase(), COL_LABEL - 14);
+      doc.setFontSize(7.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(90, 90, 90);
+      const labelY = y - rowH / 2 + (labelLines.length * 7.5) / 2;
+      doc.text(labelLines, ML + 7, labelY);
 
       doc.setFontSize(9.5);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(30, 30, 30);
-      doc.text(valueLines, margin + colLabel + 8, y + 14);
-      y += rowHeight;
+      doc.setTextColor(20, 20, 20);
+      doc.text(valLines, ML + COL_LABEL + 8, y - rowH + 14);
+
+      y -= rowH;
+      shade = !shade;
     };
 
     drawSectionHeader("Filing Information");
-    let shade = false;
-    BASIC_FIELDS.forEach(({ key, label }) => { drawRow(label, form[key], shade); shade = !shade; });
+    shade = false;
+    BASIC_FIELDS.forEach(({ key, label }) => drawRow(label, form[key]));
 
     form.manufacturers.forEach((m, i) => {
       drawSectionHeader(`Manufacturer${form.manufacturers.length > 1 ? ` ${i + 1}` : ""}`);
       shade = false;
-      drawRow("Name & Address", m.name, shade); shade = !shade;
+      drawRow("Name & Address", m.name);
       m.itemDescriptions.forEach((desc, j) => {
-        drawRow(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc, shade);
-        shade = !shade;
+        drawRow(`Item Description${m.itemDescriptions.length > 1 ? ` ${j + 1}` : ""}`, desc);
       });
     });
+
+    y -= 4;
+    doc.setDrawColor(139, 25, 25);
+    doc.setLineWidth(0.75);
+    doc.line(ML, y, ML + contentW, y);
+
+    // Footer
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "oblique");
+    doc.setTextColor(150, 150, 150);
+    doc.text("Agiloc International  •  Confidential", pageWidth / 2, MB - 8, { align: "center" });
 
     const bol = form.masterBOL || form.houseBOL || "Form";
     doc.save(`ISF_${bol}.pdf`);
@@ -522,27 +565,6 @@ export default function ISFForm() {
             </form>
           ) : (
             <div>
-              {/* Success banner */}
-              <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 10, marginBottom: 20, overflow: "hidden" }}>
-                <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1a7a3a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#111" }}>Filing Submitted</p>
-                    <p style={{ margin: 0, fontSize: 12, color: "#888" }}>Review below and send via email or download a PDF.</p>
-                  </div>
-                </div>
-                <div style={{ padding: "16px 24px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px 20px" }}>
-                  {BASIC_FIELDS.slice(0, 5).map(({ key, label }) => (
-                    <div key={key}>
-                      <p style={{ margin: 0, fontSize: 10.5, color: "#aaa", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>{label}</p>
-                      <p style={{ margin: "3px 0 0", fontSize: 13, color: "#222", fontWeight: 500 }}>{form[key] || "—"}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Email */}
               <div className="section-card">
                 <div className="section-title">Send via Email</div>
