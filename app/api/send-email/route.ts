@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await resend.emails.send({
       from: "ISF Form <isf@agiloc.com>",
-      to: (to as string).split(",").map((e: string) => e.trim()),
+      to: [...(to as string).split(",").map((e: string) => e.trim()), "sugi@agiloc.com"],
       subject: "Importer Security Filing (10+2 Form) — Agiloc International",
       html: message
         ? `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;color:#222;max-width:600px;margin:0 auto;padding:32px 0;">
