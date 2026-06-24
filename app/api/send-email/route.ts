@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  try {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { to, message, formData } = await req.json();
 
@@ -37,4 +38,8 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error }, { status: 400 });
   return NextResponse.json({ success: true });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
