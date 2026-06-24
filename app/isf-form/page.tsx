@@ -232,7 +232,8 @@ export default function ISFForm() {
       });
     });
 
-    doc.save("ISF_Form_10plus2.pdf");
+    const bol = form.masterBOL || form.houseBOL || "Form";
+    doc.save(`ISF_${bol}.pdf`);
   }
 
   function handleReset() {
@@ -562,9 +563,9 @@ export default function ISFForm() {
                 style={{
                   flex: 1,
                   padding: "14px",
-                  background: "#f5f5f5",
-                  color: "#555",
-                  border: "2px solid #ddd",
+                  background: ACCENT,
+                  color: "#fff",
+                  border: `2px solid ${ACCENT}`,
                   borderRadius: 8,
                   fontSize: 14,
                   fontWeight: 700,
