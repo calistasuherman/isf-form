@@ -260,7 +260,8 @@ export default function ISFForm() {
     <>
       <style>{`
         * { box-sizing: border-box; }
-        input, textarea, button { font-family: inherit; }
+        body { font-family: 'Times New Roman', Times, serif !important; }
+        input, textarea, button { font-family: 'Times New Roman', Times, serif; }
         .field-input {
           width: 100%;
           padding: 10px 13px;
@@ -377,9 +378,9 @@ export default function ISFForm() {
         .upload-zone.has-file { border-color: ${ACCENT}; background: ${ACCENT_LIGHT}; }
       `}</style>
 
-      <div style={{ minHeight: "100vh", background: "#f6f5f3" }}>
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
         {/* Header */}
-        <div style={{ background: "#fff", borderBottom: "1px solid #e8e8e8", padding: "18px 40px", textAlign: "center" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#fff", borderBottom: "1px solid #e8e8e8", padding: "18px 40px", textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/agiloc-logo.jpg" alt="Agiloc International" style={{ height: 72, objectFit: "contain" }} />
         </div>
@@ -467,7 +468,7 @@ export default function ISFForm() {
                           <textarea className="field-input" rows={3} required value={mfg.name} onChange={(e) => handleManufacturerName(i, e.target.value)} placeholder="Manufacturer name and full address..." />
                         </div>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, color: "#777" }}>Item Description</span>
+                          <span style={{ fontSize: 11.5, fontWeight: 600, color: "#444" }}>Item Description</span>
                           <button type="button" className="btn-outline" style={{ padding: "4px 12px", fontSize: 11 }} onClick={() => addItemDescription(i)}>+ Add Item</button>
                         </div>
                         {mfg.itemDescriptions.map((desc, j) => (
