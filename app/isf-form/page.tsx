@@ -197,7 +197,7 @@ export default function ISFForm() {
     doc.setFontSize(16.5);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(80, 80, 80);
-    doc.text("Importer Security Filing", pageW / 2, y, { align: "center" });
+    doc.text("IMPORTER SECURITY FILING", pageW / 2, y, { align: "center" });
     y += 16;
 
     // Subtitle

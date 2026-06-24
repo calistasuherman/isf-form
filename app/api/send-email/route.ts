@@ -55,7 +55,7 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
   y -= 36;
 
   // Title
-  const title = "Importer Security Filing";
+  const title = "IMPORTER SECURITY FILING";
   const titleW = bold.widthOfTextAtSize(title, 16.5);
   page.drawText(title, { x: (W - titleW) / 2, y, font: bold, size: 16.5, color: GRAY });
   y -= 16;
