@@ -169,8 +169,7 @@ export async function POST(req: NextRequest) {
             <p style="margin:0;font-size:12px;color:#888;border-top:1px solid #eee;padding-top:16px;">Agiloc International — ISF Filing System</p>
            </div>`
         : `<div style="font-family:system-ui,sans-serif;font-size:14px;color:#222;max-width:600px;margin:0 auto;padding:32px 0;">
-            <p>Please find the attached Importer Security Filing (10+2 Form) from Agiloc International.</p>
-            <p style="margin:0;font-size:12px;color:#888;border-top:1px solid #eee;padding-top:16px;">Agiloc International — ISF Filing System</p>
+            <p style="margin:0;font-size:12px;color:#888;">Agiloc International — ISF Filing System</p>
            </div>`,
       attachments: [
         { filename: "ISF_Form_10plus2.pdf", content: Buffer.from(pdfBytes) },
@@ -180,7 +179,7 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    if (error) return NextResponse.json({ error }, { status: 400 });
+    if (error) return NextResponse.json({ error: error.message || JSON.stringify(error) }, { status: 400 });
     return NextResponse.json({ success: true });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
