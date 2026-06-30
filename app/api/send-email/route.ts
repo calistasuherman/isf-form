@@ -155,28 +155,35 @@ async function buildPDF(formData: { label: string; value: string }[]): Promise<U
 export async function POST(req: NextRequest) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { to, message, formData, packingListBase64, packingListName } = await req.json();
+    const fd = await req.formData();
+    const to = fd.get("to") as string;
+    const message = fd.get("message") as string;
+    const formData = JSON.parse(fd.get("formData") as string);
+    const packingListFile = fd.get("packingList") as File | null;
 
     const pdfBytes = await buildPDF(formData as { label: string; value: string }[]);
 
+    const attachments: { filename: string; content: Buffer }[] = [
+      { filename: "ISF_Form_10plus2.pdf", content: Buffer.from(pdfBytes) },
+    ];
+    if (packingListFile && packingListFile.size > 0) {
+      const buf = await packingListFile.arrayBuffer();
+      attachments.push({ filename: packingListFile.name, content: Buffer.from(buf) });
+    }
+
     const { error } = await resend.emails.send({
-      from: "ISF Form <isf@agiloc.com>",
-      to: [...(to as string).split(",").map((e: string) => e.trim()), "sugi@agiloc.com"],
+      from: "ISF Form <info@agiloc.com>",
+      to: [...to.split(",").map((e: string) => e.trim()), "sugi@agiloc.com"],
       subject: "Importer Security Filing (10+2 Form) — Agiloc International",
       html: message
         ? `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;color:#222;max-width:600px;margin:0 auto;padding:32px 0;">
-            <p style="margin:0 0 20px;">${(message as string).replace(/\n/g, "<br/>")}</p>
+            <p style="margin:0 0 20px;">${message.replace(/\n/g, "<br/>")}</p>
             <p style="margin:0;font-size:12px;color:#888;border-top:1px solid #eee;padding-top:16px;">Agiloc International — ISF Filing System</p>
            </div>`
         : `<div style="font-family:system-ui,sans-serif;font-size:14px;color:#222;max-width:600px;margin:0 auto;padding:32px 0;">
             <p style="margin:0;font-size:12px;color:#888;">Agiloc International — ISF Filing System</p>
            </div>`,
-      attachments: [
-        { filename: "ISF_Form_10plus2.pdf", content: Buffer.from(pdfBytes) },
-        ...(packingListBase64 && packingListName
-          ? [{ filename: packingListName, content: Buffer.from(packingListBase64, "base64") }]
-          : []),
-      ],
+      attachments,
     });
 
     if (error) return NextResponse.json({ error: error.message || JSON.stringify(error) }, { status: 400 });

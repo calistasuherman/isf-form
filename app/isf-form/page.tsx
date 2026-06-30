@@ -137,25 +137,12 @@ export default function ISFForm() {
     setEmailSending(true);
     setEmailError("");
     try {
-      let packingListBase64: string | null = null;
-      let packingListName: string | null = null;
-      if (form.packingList) {
-        packingListBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const result = reader.result as string;
-            resolve(result.split(",")[1]);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(form.packingList!);
-        });
-        packingListName = form.packingList.name;
-      }
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to: emailTo, message: emailMessage, formData: buildFormDataRows(), packingListBase64, packingListName }),
-      });
+      const fd = new FormData();
+      fd.append("to", emailTo);
+      fd.append("message", emailMessage);
+      fd.append("formData", JSON.stringify(buildFormDataRows()));
+      if (form.packingList) fd.append("packingList", form.packingList);
+      const res = await fetch("/api/send-email", { method: "POST", body: fd });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || "Failed to send");
@@ -600,6 +587,9 @@ export default function ISFForm() {
 
               {/* Actions */}
               <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                <button className="btn-outline" onClick={() => setSubmitted(false)} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  ← Back
+                </button>
                 <button className="btn-outline" onClick={handleGeneratePDF} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
